@@ -1,0 +1,1 @@
+- Trình quản lý queue duy trì 4 queue khác nhau: incomming, active, deferr, corrupt
