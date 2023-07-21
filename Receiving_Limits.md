@@ -1,0 +1,6 @@
+- smtpd daemon có thể thực thi một số giới hạn với incoming mail
+- Các giới hạn có thể định cấu hình thông qua một số tham số trong file main.cf
+- Bạn có thể giới hạn kích thước của message, số lượng người nhận cho một lần gửi và độ dài của các dòng trong một tin nhắn
+- Bạn cũng có thể giới hạn số lỗi cho phép từ một client trước khi ngắt giao tiếp
+- Để giới hạn số lượng người nhận cho sigle message, sử dụng `smtpd_recipient_limit` parameter. Mặc định là 1000 người nhận, và nó nên đủ cho hoạt động bình thường
+- `message_size_limit` parameter giới hạn size của message nào trên hệ thống của bạn sẽ được chấp nhận. Mặc định là 10MB. Nếu bạn có dung lượng đĩa hoặc bộ nhớ hạn chế, bạn có thể muốn hạ thấp giá trị
