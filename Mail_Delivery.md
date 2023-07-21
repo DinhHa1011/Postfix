@@ -26,3 +26,12 @@
 - Khi một hệ thống đích không khả dụng online trở lại, Postfix cẩn thận để không làm quá tải nó với tất cả các message đang chờ xử lý. Cho dù gửi thư bị defer trước đó hay message mới, Postfix, lúc đầu chỉ tạo một một số lượng kết nối giới hạn tới một hệ thống nhận
 - Sau khi Postfix xác định gửi thành công tới một trang web cụ thể, nó tăng từ từ (lên đến giới hạn có thể định cấu hình) các kết nối đồng thời với nó
 - Nếu Postfix phát hiện rắc rối nào từ nơi tiếp nhận, nó bắt đầu gửi lại ngay lập tức
+### Other Delivery Agents
+- CÓ Postfix delivery agent khác có thể config để xử lý message cho class hoặc destination cụ thể
+- Delivery agent khác phải config trong file master.cf
+- Chúng được gọi thông qua `class_transport` hoặc thông qua một mục trong một bảng transport, được liệt kê trong `transport_maps` parameter.
+- Hai tác nhân phân phối phổ biến là lmtp và pipe agent
+#### Delivery via LMTP
+#### Pipe delivery
+- Postfix cung cấp tùy chọn gửi message tới program khác thông qua pipe daemon. Pipe daemon gửi message tới các command bên ngoài
+- Một cách sử dụng phổ biến cho pipe daemon là có email được gửi tới một filter nội dung bên ngoài hoặc phương tiện liên lạc khác, pipe daemon thông báo đến người quản lý queue để đánh dấu message cho một future delivery attempt và lưu trữ nó trong defered queue
