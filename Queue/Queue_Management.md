@@ -1,0 +1,4 @@
+- Trình quản lý queue qmgr theo nhiều cách là trái tim của hệ thống Postfix của bạn
+- Tất cả message, cả outbound và inbound phải thông qua queue
+- Bạn nên hiểu queue và Postfix sử dụng nó như thế nào trong trường hợp bạn phải xử lý sự cố một vấn đề
+- Queue manager chứa 5 five queue khác nhau: incoming, active, deffered, hold, corrupt. Postfix 
