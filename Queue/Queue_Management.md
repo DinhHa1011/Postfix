@@ -33,3 +33,21 @@
 #### Error Notifications
 - Postfix có thể report chắc chắn lỗi bằng gửi lỗi message tới một admin. Postfix phân loại lỗi để thông báo, như được show trong bảng dưới. `notify_classes` parameter trong `main.cf` chứa danh sách các lớp lỗi rằng nên tạo thông báo lỗi. Theo mặc định parameter gồm `resource` và `software` error
 - Mỗi lớp của lỗi có thể config để gửi thông báo tới một địa chỉ email cụ thể, sử dụng parameter của form `class_notice_recipient`. Theo mặc định chúng tất cả đi tới postmaster. Bảng dưới đây cung cấp danh sách các loại lỗi có thể xảy ra, cùng với các tham số cho biết ai sẽ nhận thông báo lỗi
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/3ac339d2-4512-41ff-aa50-537e785d9ffe)
+- Nếu bạn muốn nhận thông báo tất cả vấn đề, set parameter như dưới đây:
+```
+notify_classes = bounce, 2bounce, delay, policy, protocol, resource, software
+```
+### Queue Tools
+- Postfix cung cấp command-line tools để hiển thị và quản lý message trong queue của bạn. Dòng lệnh primary là postsuper và postqueue. Bạn có thể thực hiện các tác vụ dưới đây trên message trong queue:
+  - Listing messages
+  - Deleting messages
+  - Holding messages
+  - Requeuing messages
+  - Displaying messages
+  - Flushing messages
+- Mỗi nhiệm vụ và các lệnh để hoàn thành chúng được giải thích trong các phần tiếp theo
+#### Listing the Queue
+- queue display chứa một mục nhập cho mỗi message để show message ID, size, arrival time, sender, và recipient addresses. Deferred message cũng gồm lý do chúng không thể gửi được. Message trong active queue được đánh dấu bằng dấu hoa thị sau Queue ID. Message trong hold queue được đánh dấu bằng một dấu chấm than. Deferred message không được đánh dấu
+- Bạn có thể list tất cả message trong queue với dòng lệnh `postqueue -p`. Postfix cũng cung cấp dòng lệnh mailq cho khả năng tương thích với Sendmail. Postfix thay thế cho mailq tạo ra cùng một output như `postqueue -p`. Một typical queue entry trông như sau:
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/f5dcefa5-555d-4fd6-81e1-3ccc48ce6501)
