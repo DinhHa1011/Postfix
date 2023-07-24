@@ -52,3 +52,97 @@ notify_classes = bounce, 2bounce, delay, policy, protocol, resource, software
 - queue display chứa một mục nhập cho mỗi message để show message ID, size, arrival time, sender, và recipient addresses. Deferred message cũng gồm lý do chúng không thể gửi được. Message trong active queue được đánh dấu bằng dấu hoa thị sau Queue ID. Message trong hold queue được đánh dấu bằng một dấu chấm than. Deferred message không được đánh dấu
 - Bạn có thể list tất cả message trong queue với dòng lệnh `postqueue -p`. Postfix cũng cung cấp dòng lệnh mailq cho khả năng tương thích với Sendmail. Postfix thay thế cho mailq tạo ra cùng một output như `postqueue -p`. Một typical queue entry trông như sau:
 ![image](https://github.com/DinhHa1011/Postfix/assets/119484840/f5dcefa5-555d-4fd6-81e1-3ccc48ce6501)
+#### Deleting Messages
+- Dòng lệnh postsuper cho phép bạn remove message từ queue
+- Để xóa message trong mục nhập mẫu được hiển thị ở trên, hãy thực thi postsuper với tùy chọn -d:
+  ``` 
+  # postsuper -d DBA3F1A9
+  postsuper: DBA3F1A9: removed
+  postsuper: Deleted: 1 message
+  ```
+- Nếu bạn có nhiều message cần xóa, bạn có thể clear toàn bộ queue với ALL argument:
+  ```
+  # postsuper -d ALL
+  postsuper: Deleted: 23 messages
+  ```
+- Đối số ALL phải được viết hoa. Hãy thật cẩn thận khi sử dụng lệnh, vì nó sẽ xóa tất cả các tin nhắn đã xếp hàng đợi mà không hỏi bất kỳ câu hỏi nào.
+- Thay vì xóa tất cả queue message hoặc chỉ xóa một, bạn thường muốn xóa message với một địa chỉ email cụ thể. Ví dụ dưới đây là một Perl script để cung cấp một cách thuận tiện để chỉ định địa chỉ email để xóa các thư cụ thể khỏi queue
+```
+#!/usr/bin/perl -w
+#
+# pfdel - deletes message containing specified address from
+# Postfix queue. Matches either sender or recipient address.
+#
+# Usage: pfdel <email_address>
+#
+use strict;
+# Change these paths if necessary.
+my $LISTQ = "/usr/sbin/postqueue -p";
+my $POSTSUPER = "/usr/sbin/postsuper";
+my $email_addr = "";
+my $qid = "";
+my $euid = $>;
+if ( @ARGV != 1 ) {
+die "Usage: pfdel <email_address>\n";
+} else {
+$email_addr = $ARGV[0];
+}
+if ( $euid != 0 ) {
+die "You must be root to delete queue files.\n";
+}
+open(QUEUE, "$LISTQ |") ||
+die "Can't get pipe to $LISTQ: $!\n";
+my $entry = <QUEUE>;
+$/ = "";
+# skip single header line
+# Rest of queue entries print on
+# multiple lines.
+while ( $entry = <QUEUE> ) {
+if ( $entry =~ / $email_addr$/m ) {
+($qid) = split(/\s+/, $entry, 2);
+$qid =~ s/[\*\!]//;
+next unless ($qid);
+}
+}
+close(QUEUE);
+#
+# Execute postsuper -d with the queue id.
+# postsuper provides feedback when it deletes
+# messages. Let its output go through.
+#
+if ( system($POSTSUPER, "-d", $qid) != 0 ) {
+# If postsuper has a problem, bail.
+die "Error executing $POSTSUPER: error " .
+"code " . ($?/256) . "\n";
+}
+if (! $qid ) {
+die "No messages with the address <$email_addr> " .
+"found in queue.\n";
+}
+exit 0;
+```
+#### Holding Messages
+- Hold queue thì có sẵn cho message bạn muốn giữ trong queue của bạn vô thời hạn
+- Hình đưới đây show hold queue và bạn có thể chuyển message tới hold queue ở đâu, chúng sẽ không được gửi cho đến khi bạn xóa chúng một cách cụ thể hoặc di chuyển chúng trở lại để xử lý queue bình thường. Để đặt thông báo ví dụ vào hold queue, sử dụng dòng lệnh postsuper với -h option:
+```
+postsuper -h DBA3F1A9
+```
+- The queue entry chứa dấu chấm than để cho biết rằng message trong hold:
+```
+-Queue ID- --Size-- ----Arrival Time---- -Sender/Recipient-------
+DBA3F1A9 !  553 Mon May 5 14:42:15 kdent@example.com
+        (connect to mail.ora.com[192.168.155.63]: Connection refused)
+                                          kdent@ora.com
+```
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/82fbbfab-10af-45b3-a2f5-d4bf5fc903dd)
+- Để di chuyển thư trở lại queue thông thường để xử lý thông thường, thay vào đó hãy thực hiện lệnh với tùy chọn -H viết hoa:
+```
+postsuper -H DBA3F1A9
+```
+- Sau khi message chuyển trở lại, queue manager đánh dấu nó để phân phối lại theo lịch trình thông thường, hoặc bạn có thể xóa message để có nó được gửi đi ngay lập tức
+#### Requeuing Message
+- Nếu bạn có message bị deferred do vấn đề config đã được khắc phục, bạn có thể phải xếp queue để chúng được gửi thành công. Nếu cấu hình sai khiến Postfix lưu trữ không đúng thông tin về bước nhảy hoặc trường chuyển, hoặc để viết lại đúng địa chỉ, yêu cầu Postfix cập nhật thông tin không chính xác dựa trên config mới của bạn. Dòng lệnh postsuper sử dụng option -r để yêu cầu message. Bạn có thể chỉ định một queue ID cho một message hoặc từ ALL bằng chữ in hoa để yêu cầu mọi thứ
+```
+# postsuper -r ALL
+```
+- Các message được yêu cầu nhận queue ID mới và một tiêu đề bổ sung Received
