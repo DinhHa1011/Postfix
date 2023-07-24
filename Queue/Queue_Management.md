@@ -33,6 +33,7 @@
 #### Error Notifications
 - Postfix có thể report chắc chắn lỗi bằng gửi lỗi message tới một admin. Postfix phân loại lỗi để thông báo, như được show trong bảng dưới. `notify_classes` parameter trong `main.cf` chứa danh sách các lớp lỗi rằng nên tạo thông báo lỗi. Theo mặc định parameter gồm `resource` và `software` error
 - Mỗi lớp của lỗi có thể config để gửi thông báo tới một địa chỉ email cụ thể, sử dụng parameter của form `class_notice_recipient`. Theo mặc định chúng tất cả đi tới postmaster. Bảng dưới đây cung cấp danh sách các loại lỗi có thể xảy ra, cùng với các tham số cho biết ai sẽ nhận thông báo lỗi
+
 ![image](https://github.com/DinhHa1011/Postfix/assets/119484840/3ac339d2-4512-41ff-aa50-537e785d9ffe)
 - Nếu bạn muốn nhận thông báo tất cả vấn đề, set parameter như dưới đây:
 ```
