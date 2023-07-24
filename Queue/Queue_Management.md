@@ -143,7 +143,7 @@ postsuper -H DBA3F1A9
 #### Requeuing Message
 - Nếu bạn có message bị deferred do vấn đề config đã được khắc phục, bạn có thể phải xếp queue để chúng được gửi thành công. Nếu cấu hình sai khiến Postfix lưu trữ không đúng thông tin về bước nhảy hoặc trường chuyển, hoặc để viết lại đúng địa chỉ, yêu cầu Postfix cập nhật thông tin không chính xác dựa trên config mới của bạn. Dòng lệnh postsuper sử dụng option -r để yêu cầu message. Bạn có thể chỉ định một queue ID cho một message hoặc từ ALL bằng chữ in hoa để yêu cầu mọi thứ
 ```
-# postsuper -r ALL
+ postsuper -r ALL
 ```
 - Các message được yêu cầu nhận queue ID mới và một tiêu đề bổ sung Received
 #### Display Messages
