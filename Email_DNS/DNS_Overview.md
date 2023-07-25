@@ -1,0 +1,1 @@
+- DNS là một cơ sở dữ liệu phân tán rộng lớn với công việc chính là map hostname tới địa chỉ IP. Nó cũng có một role quan trọng trong email routing. Trong chap này 
