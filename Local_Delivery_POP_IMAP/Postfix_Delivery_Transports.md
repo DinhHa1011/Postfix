@@ -1,0 +1,1 @@
+- Postfix thường gửi tới 4 class khác nhau của địa chỉ người nhận: local, relay, virtual alias và virtual mailbox. Cách bạn config domain mà bạn chấp nhận mail 
