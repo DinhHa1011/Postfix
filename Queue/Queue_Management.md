@@ -147,3 +147,39 @@ postsuper -H DBA3F1A9
 ```
 - Các message được yêu cầu nhận queue ID mới và một tiêu đề bổ sung Received
 #### Display Messages
+- Dỏng lệnh postcat hiển thị nội dung của một queue file:
+```
+postcat -q 671367F5E1
+```
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/a01069f8-1be4-4706-af54-926e185d5c77)
+
+- Các version cũ hơn của postcat thì không support option -q nhưng yêu cầu full path tới queue file. Vì một message có thể nằm ở bất kỳ queue nào (maildrop, incoming, active, deferred, hold), và mỗi trong số này có nhiều thư mục con, đường dẫn đến một file queue cụ thể thì không rõ ràng ngay lập tức. Nếu bạn sử dụng một version cũ của postcat, mà không support option -q, bạn có thể tạo một shell script như dưới như một cách thuận tiện để xem queue director bằng cách chỉ xác định queue ID. Script chấ nhận một queue ID như một đối số, check tất cả queue director để định vị queue file, và thực thi postcat với tất cả đường dẫn của đối số. Nội dung đã được hiển thị. Script đơn giản này chỉ hiển thị một queue file 1 lúc
+```
+PATH=/usr/bin:/usr/sbin
+QS="deferred active incoming maildrop hold"
+QPATH=`postconf -h queue_directory`
+if [ $# -ne 1 ]; then
+  echo "Usage: pfcat <queue id>"
+  exit 1
+fi
+if [ `whoami` != "root" ]; then
+  echo "You must be root to view queue files."
+  exit 1
+fi
+if [ ! -d $QPATH ]; then
+  echo "Cannot locate queue directory $QPATH."
+  exit 1
+fi
+for q in $QS
+do
+  FILE=`find $QPATH/$q -type f -name $1`
+  if [ -n "$FILE" ]; then
+    postcat $FILE
+    exit 0
+  fi
+done
+if [ -z $FILE ]; then
+  echo "No such queue file $1"
+  exit 1
+fi
+```
