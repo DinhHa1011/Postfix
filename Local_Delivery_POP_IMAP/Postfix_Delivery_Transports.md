@@ -1,1 +1,11 @@
-- Postfix thường gửi tới 4 class khác nhau của địa chỉ người nhận: local, relay, virtual alias và virtual mailbox. Cách bạn config domain mà bạn chấp nhận mail 
+- Postfix thường gửi tới 4 class khác nhau của địa chỉ người nhận: local, relay, virtual alias và virtual mailbox. Cách bạn config domain mà bạn chấp nhận mail sẽ xác định phương thức được sử dụng bởi Postfix. Dưới đây là các phương thức vận chuyển bởi Postfix:
+  - local
+    - Delivery mail trên hệ thống local. Mỗi địa chỉ có một account trên hệ thống hoặc đến từ file local aliases (historically /etc/aliases)
+    - Delivery message đến mail spool của hệ thống hoặc mail file trong thư mục home.
+    - Delivery được xử lý bởi local delivery agent hoặc được chuyển đến một custom delivery program
+    - Danh sách local domain trong `mydestination` parameter
+  - relay
+    - Delivery mail tới hệ thống khác, thường là trên cùng network. Relay domain thường được config trên hệ thống gateway khi Postfix chấp nhận mail cho toàn bộ network. Hệ thống gateway relay message tới chính xác hệ thống mail nội bộ. Delivery được xử lý bởi relay transport, đơn giản là một bản sao của tác nhân smtp, nhưng nó được tối ưu hóa để delivery đến các hệ thống nội bộ trên local network. List relay domain trong `relay_domains` parameter.
+  - virtual
+    - Delivery mail cho virtual mailbox domains. Virtual mailbox domains được sử dụng cho hosting multiple domains sử dụng một bộ đệm mail riêng biệt chứa mailbox cho nhiều miền riêng biệt. Email user thường không có account trên mail server. Danh sách virtual mailbox domain trong `virtual_mailbox_domains` parameter. 
+  - Delivery tới nonlocal domain được xử lý bởi smtp transport. Nó xác định nơi gửi message cho nonlocal domain nào thông qua DNS lookups. Địa chỉ virtual alias được gửi lại cho Postfix để gửi đến địa chỉ mới, tại thời điểm chúng sẽ được xử lý bởi một above transports. 
