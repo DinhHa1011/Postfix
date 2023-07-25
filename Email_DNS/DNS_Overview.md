@@ -1,1 +1,14 @@
-- DNS là một cơ sở dữ liệu phân tán rộng lớn với công việc chính là map hostname tới địa chỉ IP. Nó cũng có một role quan trọng trong email routing. Trong chap này 
+- DNS là một cơ sở dữ liệu phân tán rộng lớn với công việc chính là map hostname tới địa chỉ IP. Nó cũng có một role quan trọng trong email routing. Trong chap này, chúng ta sẽ xem xét cách các MTA nói chung sử dụng DNS và một số vấn đề về DNS liên quan đến Postfix và cấu hình của nó. Hãy nhớ rằng có hai khía cạnh quan trọng đối với máy chủ thư và DNS của bạn:
+  - Để gửi thư, hệ thống đang chạy Postfix mail server của bạn phải có quyền truy cập vào máy chủ DNS đáng tin cậy để phân giải tên máy chủ và thông tin định tuyến email.
+  - Để nhận thư, domain của bạn phải config đúng để route message tới mail server của bạn
+- Định cấu hình DNS server là nguyên nhân phổ biến gây ra sự cố khi cài đặt lên mail server
+### DNS Overview
+- Tại một thời điểm, việc mapping hostname tới địa chỉ IP được xử lý bởi một tệp văn bản lớn, được quản lý tập trung có chứa entry cho mỗi host có thể truy cập trên Internet
+- Mỗi trang web tải xuống một bản copy của file theo định kỳ để nhận thông tin hostname sớm nhất. Sơ đồ đó nhanh chóng trở nên khó sử dụng và dịch vụ DNS đã được hình thành. Nó được định nghĩa trong RFC 882 vào năm 1983 và đưa ra hai ý tưởng chính: dữ liệu được phân phối và việc đặt tên cho các máy chủ được phân cấp.
+- Làm cho dữ liệu được phân phối có nghĩa là mọi trang web đều cập nhật thông tin của riêng mình và các bản cập nhật sẽ có sẵn gần như ngay lập tức. Mỗi trang web có ít nhất một domain và tất cả các máy chủ tại trang web đó được đặt tên bằng cách thêm tiền tố tên máy chủ đơn giản vào domain của trang web. Ví dụ: một trang web kiểm soát tên miền example.com có thể có bất kỳ số lượng máy chủ nào có tên như server1.example.com, hp4100.example.com hoặc www.example.com.
+- Mỗi domain có ít nhất hai domain nameserver được coi là có thẩm quyền đối với domain. Nameserver có thẩm quyền phải có quyền truy cập trực tiếp vào cơ sở dữ liệu chứa tất cả thông tin về domain.
+- Dữ liệu bao gồm các loại bản ghi khác nhau được gọi là resource records. Resource record khác nhau cung cấp các loại thông tin khác nhau, chẳng hạn như địa chỉ IP, nameserver, hostname aliases và định tuyến thư. Resource record bạn cần biết cho cuộc thảo luận này như sau:
+  - A
+    - mapping của name tới địa chỉ IP đươc xử lý bởi A records. records đó chứa một hostname và địa chỉ IP của nó. Tên mà mọi người sử dụng để chỉ host phải được chuyển đổi thành địa chỉ IP được sử dụng để định tuyến Internet. Bản ghi cung cấp bản dịch từ tên đến địa chỉ này.
+  - CNAME
+    - 
