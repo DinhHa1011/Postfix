@@ -183,3 +183,13 @@ if [ -z $FILE ]; then
   exit 1
 fi
 ```
+#### Flushing Messages
+- Xóa queue khiến Postfix cố gắng gửi message trong queue ngay lập tức. Bạn có thể xóa queue message với dòng lệnh `postqueue -f`. Tuy nhiên, trừ khi bạn có lý do để mong đợi việc giao hàng thành công, tốt nhất bạn nên giao lại các nỗ lực giao hàng lại cho người quản lý hàng đợi Postfix. Nỗ lực lặp đi lặp lại để xóa queue có thể có tác động nghiêm trọng đến hiệu suất trên mail server của bạn
+- Bạn có thể xóa message dành cho một trang web cụ thể bằng option -s. Trang web phải đủ điều kiện cho tính năng quét nhanh để tính năng này hoạt động. Để đủ điều kiện, trang web phải được liệt kê trong `fast_flush_domains` parameter. Theo mặc định, `fast_flush_domains` bao gồm tất cả host liệt kê trong `relay_domains`, nhưng bạn có thể thêm các trang web bổ sung nếu bạn muốn xóa chúng trước lần thử phân phối lại theo lịch trình thông thường.
+```
+fast_flush_domains = $relay_domains example.com
+```
+- Nếu bạn biết rằng một một trang web đủ điều kiện trước đây không có sẵn đã sẵn sàng chấp nhận mail, thực thi postqueue với option -s và tên trang web:
+```
+postqueue -s example.com
+```
