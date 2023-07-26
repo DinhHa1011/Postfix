@@ -9,3 +9,4 @@
   - virtual
     - Delivery mail cho virtual mailbox domains. Virtual mailbox domains được sử dụng cho hosting multiple domains sử dụng một bộ đệm mail riêng biệt chứa mailbox cho nhiều miền riêng biệt. Email user thường không có account trên mail server. Danh sách virtual mailbox domain trong `virtual_mailbox_domains` parameter. 
   - Delivery tới nonlocal domain được xử lý bởi smtp transport. Nó xác định nơi gửi message cho nonlocal domain nào thông qua DNS lookups. Địa chỉ virtual alias được gửi lại cho Postfix để gửi đến địa chỉ mới, tại thời điểm chúng sẽ được xử lý bởi một above transports. 
+  - Phần còn lại của chap thảo luận về local delivery
