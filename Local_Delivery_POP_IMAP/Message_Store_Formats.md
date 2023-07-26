@@ -27,4 +27,14 @@ man flock
 - Phần lớn, bạn không cần phải lo lắng về việc khóa và các loại khóa có sẵn, bởi vì Postfix thực hiện tốt công việc tìm ra tùy chọn tốt nhất.
 #### The maildir format
 - Định dạng maildir mailbox khác với mbox ở chỗ nó sử dụng cấu trúc thư mục để lưu trữ email message
-- Nó được thiết kế để giải quyết một vài 
+- Nó được thiết kế để giải quyết một vài vấn đề về độ tin cậy và khóa của định dạng mbox. Ví dụ, nếu một hệ thống gặp sự cố ngay lập tức khi một email đang được gửi đến file mbox, có thể message sẽ bị cắt bớt tại điểm gửi bị gián đoạn. Khi một hệ thống online trở lại, MTA sẽ cố gắng delivery message sau đó. Thông điệp được viết một phần tại botton của mbox file có thể gây ra vấn đề khi next message append to file
+- Vấn đề khác có thể xảy ra nếu một POP/IMAP server cố gắng để truy cập mbox file tại cùng thời gian như SMTP. Nếu chương trình không sử dụng cùng cơ chế lock, mail file rất có thể sẽ bị hỏng. Có một số cơ chế lock file có thể (xem ở trên), không nhất thiết phải được sử dụng bởi tất cả mail program. Với định dạng maildir, không cần khóa vì mỗi message có file riêng. Các quy trình mail khác nhau không cần truy cập vào cùng một tệp tại cùng một thời điểm.
+- Thư mục maildir-style có 3 subdirectories, must tất cả trên filesystem như: tmp, new, cur. Subdirectories thì luôn dưới một mail directory trong thư mục home của người dùng:
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/4e25fbc3-cd08-44a2-a07c-90d2cabcffc9)
+- File trong thư mục new là message đã được gửi nhưng chưa được đọc.
+- Thời gian sửa đổi của file là ngày gửi tin nhắn. Tệp này thường chứa thông báo ở định dạng RFC 2822 và không cần dòng From_.
+- Message đã được xem được chuyển vào thư mục cur. Thư mục tmp được sử dụng trong quá trình gửi tin nhắn để lưu trữ nội dung của file trước khi nó có thể được xác nhận là đã được ghi vào thư mục mới.
+#### Mbox Versus Maildir
+- Không có câu trả lời đơn giản nào giúp bạn quyết định loại định dạng mailbox nào là tốt nhất cho mình. Định dạng mbox có lợi thế là hầu như được hỗ trợ phổ biến, nhưng có vấn đề về khóa tệp đã thúc đẩy sự phát triển của định dạng maildir.
+- Mặt khác, có những lo ngại về khả năng mở rộng quy mô của định dạng maildir để xử lý số lượng lớn thư trên một số hệ thống tệp. Có các đối số hiệu suất để hỗ trợ cả hai định dạng: định vị và truy cập hoặc xóa một thư cụ thể có thể nhanh hơn với maildir, nhưng việc gửi bằng cách chỉ cần thêm văn bản của thư vào cuối một tệp có thể nhanh hơn ở định dạng mbox.
+- Sự lựa chọn của bạn rất có thể sẽ được thúc đẩy bởi việc bạn chọn máy chủ POP/IMAP. Nếu bạn chọn một máy chủ POP/IMAP yêu cầu định dạng maildir, thì sự lựa chọn sẽ dành cho bạn. Postfix dễ dàng hỗ trợ một trong hai định dạng, vì vậy bạn có thể yên tâm cho phép các cân nhắc khác đưa ra quyết định của mình. Nếu bạn nghĩ rằng nó sẽ có ý nghĩa trong môi trường của bạn, bạn nên chạy thử nghiệm cả hai định dạng, mô phỏng các tác vụ thư của riêng bạn càng sát càng tốt.
