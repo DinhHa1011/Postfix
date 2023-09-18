@@ -32,9 +32,12 @@ kdent@ora.com              error:no mail accepted for kdent
   ```
   example.com smtp:[192.168.23.56]:20025
   ```
-    - Tất cả message cho http://example.com đươc relay suer dụng smtp transport tới host tại IP address 192.168.25.56. Message được gửi trên port 20025 thay vì SMTP mặc định port 25
+    - Tất cả message destined cho http://example.com được relay sử dụng smtp transport tới host tại IP address 192.168.25.56. Message được gửi trên port 20025 thay vì SMTP mặc định port 25
     - Lưu ý rằng, địa chỉ IP nằm trong ngoặc, như yêu cầu cho địa chỉ IP
   ```
   oreilly.com relay:[gateway.oreilly.com]
   ```
-    
+    - Tất cả message destined cho http://oreilly.com được relay sử dụng relay transport tới host gateway.oreilly.com
+    - Vì không có port được chỉ đinh, Postfix sử dụng port 25. Hostname được đặt trong ngoặc để ngăn Postfix tra cứu bản ghi MX
+    - Thay vào đó, nó tra cứu bản ghi A và gửi tới địa chỉ IP mà hostname resolves to
+- relay transport được giới thiệu trong version 2 của Postfix để fix 1 potential performance bottleneck với queue scheduling
