@@ -40,4 +40,4 @@ kdent@ora.com              error:no mail accepted for kdent
     - Tất cả message destined cho http://oreilly.com được relay sử dụng relay transport tới host gateway.oreilly.com
     - Vì không có port được chỉ đinh, Postfix sử dụng port 25. Hostname được đặt trong ngoặc để ngăn Postfix tra cứu bản ghi MX
     - Thay vào đó, nó tra cứu bản ghi A và gửi tới địa chỉ IP mà hostname resolves to
-- relay transport được giới thiệu trong version 2 của Postfix để fix 1 potential performance bottleneck với queue scheduling
+- relay transport được giới thiệu trong version 2 của Postfix để fix 1 potential performance bottleneck với queue scheduling. Bạn nên 
