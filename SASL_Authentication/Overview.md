@@ -1,0 +1,2 @@
+- Basic SMTP protocol thì không cung cấp cơ chế để xác thực user
+- Từ email envelope address thì dễ để fake, bạn không thể biết ai đang gửi mail tới server của bạn trừ khi bạn có một phương tiện
