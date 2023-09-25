@@ -1,2 +1,52 @@
 - Basic SMTP protocol thì không cung cấp cơ chế để xác thực user
-- Từ email envelope address thì dễ để fake, bạn không thể biết ai đang gửi mail tới server của bạn trừ khi bạn có một phương tiện
+- Từ email envelope address thì dễ để fake, bạn không thể biết ai đang gửi mail tới server của bạn trừ khi bạn có một phương tiện đáng tin cậy để auth 
+- Để cho phép đặc quyền mail relay trên server của bạn, bạn cần sự đảm bảo rằng người gửi tự xưng là ai, và bạn không thể phụ thuộc trên địa chỉ email của người gửi như nhận dạng (identification)
+- Trong chapter này, chúng ta xem sử dụng Simple Authentication và Security Layer (SASL) như một phương tiện để kiểm soát mail relaying và nói chung là xác định xem ai là người sử dụng mail server của bạn
+- Bạn có thể muốn cung cấp quyền truy cập cho các cá nhân suer dụng mail server của bạn như SMTP server của họ, hoặc tới MTAs khác để relay thông qua hệ thống của bạn
+- Chúng ta cũng xem config Postfix để cung cấp thông tin xác thực của riêng mình tới các MTA khác có thể yêu cầu xác thực trước khi cho phép gửi hoặc chuyển tiếp email
+- Vì bạn khóa mail server của bạn để ngăn chặn việc chuyển tiếp trái phép, một vài user của bạn có thể gặp sự cố gửi mail khi không dùng network của bạn.
+- Nếu bạn có user di chuyển bằng laptop, ví dụ, họ sẽ connect thông qua ISP và get một địa chỉ IP từ dial-up pool của nó. Hoặc có lẽ ban có người dùng làm việc tại nhà. Trong trường hợp đó, bạn sẽ không biết địa chỉ IP của user là gì, SASL có thể cung cấp phương tiện để xác định chúng một cách đáng tin cậy
+- RFC 2554, "SMTP Service Extension for Authentication", cung cấp một extension tới SMTP protocol basic để cho phép client auth tới một SMTP server sử dụng SASL protocol.
+- Chúng ta sẽ show sử dụng thư viện Cyrus SASL từ Carnegie Mellon để add SASL tới Postfix
+- Bạn có thể cũng muốn add support cho TLS. TLS (formerly SSL) được sử dụng phổ biến nhất để mã hóa các cuộc hội thoại giữa các web browsers và servers, nhưng hoạt động tốt như nhau cho mail server và client.
+- Vì một số cơ chế mật khẩu của SASL truyền mật khẩu dưới dạng văn bản gốc nên bạn có thể sử dụng TLS để đảm bảo mật khẩu của bạn không được gửi rõ ràng.
+- Việc thêm SASL vào Postfix yêu cầu bạn phải có thư viện Cyrus trên hệ thống của mình và hệ thống Postfix của bạn phải được biên dịch cùng với chúng. Người dùng từ xa phải cấu hình ứng dụng email khách của họ để gửi thông tin đăng nhập và mật khẩu khi họ muốn chuyển tiếp thư qua hệ thống của bạn. Hầu hết các ứng dụng email hiện đại đều coi đây là một tùy chọn cấu hình khá dễ dàng.
+## SASL Overview
+- SASL là một phương thức chung để add hoặc tăng cường xác thực trong client/server protocol
+- Mục đích primary của nó là để authenticate client tới server
+- Khi bạn config SASL, bạn phải quyết định cả cơ chế xác thực (authentication mechanism), để trao đổi thông tin xác thực (thường được gọi là thông tin xác thực của người dùng) và khung xác thực (authentication framework) về cách lưu trữ thông tin người dùng
+- Cơ chế authen SASL quản lý các thách thức và phản hồi giữa client và server và cũng như cách mã hóa chúng để truyền tải
+- Authen framework ám chỉ cách server lưu trữ chính nó và xác minh thông tin password. Ảnh dưới có 2 process. Sau khi xác thực thành công, máy chủ sẽ biết danh tính của người dùng và có thể xác định những đặc quyền mà người dùng được xác định sẽ có. Trong trường hợp của Postfix, nó có đặc quyền chuyển tiếp thư. Bạn cũng có thể tùy ý giới hạn những người dùng được nhận dạng sử dụng một địa chỉ người gửi cụ thể khi họ chuyển tiếp thư. Trong trường hợp của Postfix, nó là đặc quyền để relay mail. Bạn cũng có thể tùy ý giới hạn những người dùng được nhận dạng sử dụng một địa chỉ người gửi cụ thể khi họ relay mail.
+![image](https://github.com/DinhHa1011/Postfix/assets/119484840/15352cfd-0d2b-4ff1-aa6b-f93adabbbf5b)
+### Choosing an Authentication Mechanism
+- Client và server phải đồng ý trên cơ chế xác thực chúng sẽ sử dụng (Xem Cyrus documentation cho các cơ chế hiện được support). Một số cơ chế được list dưới đây:
+  - PLAIN:
+    - Cơ chế PLAIN thì đơn giản nhất để sử dụng, nhưng nó không bao gồm bất kỳ sự mã hóa thông tin xác thực nào
+    - Bạn có thể muốn sử dụng TLS liên kết với cơ chế PLAIN
+    - Login and password đi qua mailserver như một base64 encoded string
+  - LOGIN
+    - Cơ chế LOGIN không phải là một cơ chế được đăng ký hoặc hỗ trợ chính thức. Một số email client cũ hơn đã được phát triển bằng cách sử dụng LOGIN như có chế xác thực của họ. Thư viện SASL hỗ trợ nó trong trường hợp bạn phải hỗ trợ những khách hàng như vậy
+    - Nếu bạn cần nó, bạn phải chỉ định sự hỗ trợ cho nó khi bạn biên dịch các thư viện và Postfix
+    - Nếu bạn sử dụng một packaged phân bổ và bạn cần LOGIN support, kiểm tra documentation với distribution của bạn để đảm bảo nó bao gồm nó. Nếu nó được sử dụng, xác thực thay đổi công việc như cơ chế PLAIN
+  - OTP
+    - OTP là một cơ chế xác thực sử dụng one-time passwords (formerly S/Key). Cơ chế không cung cấp mã hóa nào, nhưng có thể không cần thiết vì mọi mật khẩu đã lấy được chỉ phù hợp cho một session duy nhất. SMTP client phải có khả năng gen OTP authen thông tin xác thực
+  - DIGEST-MD5
+    - Với cơ chế DIGEST-MD5, cả client và server share một password secret, nhưng nó không bao giờ sent trên network. Trao đổi xác thực bắt đầu với một thử thách từ server.
+    - Client sử dụng thử thách và secret password để gen một phản hồi duy nhất mà chỉ có thể được tạo bởi ai đó có secret password.
+    - Server sử dụng 2 phần là thử thách và secret password, để gen copy riêng của nó, và so sánh 2
+    - Vì secret password thực sự không bao giờ gửi qua mạng, nó thì không dễ bị nghe trộm trên network
+  - KERBEROS
+    - Kerberos là một giao thức xác thực network-wide
+    - Trừ khi bạn thực sự sử dụng Kerberos trên network của bạn, bạn có thể không cần hỗ trợ cơ chế Kerberó
+    - Nếu bạn sử dụng Kerberos, sử dụng SASL là một cách tốt để fit xác thực SMTP vào cơ sở hạ tầng hiện có của bạn
+  - ANONYMOUS
+    - SASL bao gồm một cơ chế ANONYMOUS, điều này có thể có ý nghĩa với một vài giao thức, nhưng không có lợi cho SMTP. Một open relay thì thiết yếu sử dụng một cơ chế anonymous, và mục đích của SMTP authen là để loại bỏ open relays
+- Khi một client connect tới một mail server, server thường liệt kê tất cả cơ chế password nó support, theo thứ tự ưu tiên
+- Client thử cái đầu tiên nó hỗ trợ. Nếu điều đó không thành công, nó có thể config để cố gắng add cơ chế đến tận khi nó có thể xác thực thành công. Nếu client và server không thể đàm phán thành công trên một cơ chế chung, xác thực thất bại
+- Một server và client đồng ý trên một cơ chế, chúng bắt đầu xác thực process, bao gồm một hoặc nhiều thử thách và phản hồi được điều chỉnh bởi cơ chế đã thỏa thuận. Protocol cũng chỉ định những trao đổi này nên được mã hóa như thế nào
+### Chooosing an Authentication Framework
+- SASL authen framework có thể sử dụng mật khẩu hệ thống Unix hiện có của bạn (ví dụ, passwd, shadow, hoặc PAM) hoặc một file password riêng chỉ để authen SMTP user
+- Option khác bao gồm Kerberos hoặc thậm chí là một kế hoạch mới của riêng bạn.
+- Cuối cùng, sự lựa chọn của bạn phụ thuộc vào vị trí và cách mà bạn muốn lưu trữ thông tin authen của bạn
+- Xem xét mạng của bạn và cách người dùng hiện xác thực để quyết định khung nào phù hợp nhất với bạn
+- Nếu mail users của bạn thực sự authen trên network của bạn qua PAM, ví dụ sau khi bạn muốn cấu hình SASL để sử dụng existing system của bạn. Mặt khác, hầu hết user SMTP của bạn đều là account ảo (với hệ thống login), bạn nên chọn cơ sở dữ liệu password riêng cho người dùng SMTP. Thường POP/IMAP server của bạn có thể share user database giống nhau, biến đây thành một lựa chọn thuận tiện cho các tài khoản ảo
