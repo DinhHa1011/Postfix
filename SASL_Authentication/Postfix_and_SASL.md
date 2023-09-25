@@ -1,0 +1,1 @@
+- Trước khi bắt đầu với SASL, bạn nên quyết định xem framework và mechainsm bạn sẽ sử dụng vì nó ảnh hường tới việc cài đặt và config của bạn
