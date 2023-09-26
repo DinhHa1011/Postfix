@@ -1,1 +1,9 @@
 - Trước khi bắt đầu với SASL, bạn nên quyết định xem framework và mechainsm bạn sẽ sử dụng vì nó ảnh hường tới việc cài đặt và config của bạn
+- Để kích hoạt xác thực SASL trong Postfix, bạn phải có thư viện Cyrus SASL và 1 bản copy của Postfix với SASL support compiled
+- Một vài platforms có sẵn packages support cho SASL
+- Nếu bạn muốn sử dụng một package Postfix đã được biên dịch trước, hãy đảm bảo rằng nó đặc biệt bao gồm support cho SASL và có các thư viện SASL cần thiết
+- Hơn nữa, hãy đảm bảo rằng các thư viện SASL được biên soạn với các option bạn cần cho trường hợp của mình
+- Option liên quan thì được mô tả thông qua phần còn lại của section này
+- Thư viện Cyrus SASL phát triển hiện đại theo 2 hướng: SASL và SASLv2. Hướng SASL đang được loại bỏ dần để chuyển sang SASLv2. Trong tương lai bạn có thể mong đợi Postfix chỉ support SASLv2
+- Bạn phải có sự kết hợp chính xác giữa version Postfix và thư việc SASL
+- Bạn cs thể sử dụng phiên bản ổn định mới nhất của SASLv2 track của thư viện Cyrus. Postfix support cho SASLv2 hậu sửa lỗi lần đầu tiên trong version 1.1.7-20020331 và được đưa vào bản phát hành chính thức 2.0. Nó thì rất quan trọng để bạn sử dụng một version của Postfix để support SASLv2 để follow hướng dẫn trong chap này. Khi văn bản đề cập đến SASL nghĩa là nó đề cập đến version 2 của thư viện
